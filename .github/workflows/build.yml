@@ -1,4 +1,4 @@
-name: Build GassiManager IPA
+name: Build Gass iManager IPA
 
 on:
   push:
@@ -12,7 +12,7 @@ permissions:
   contents: read
 
 concurrency:
-  group: gassimanager-${{ github.ref }}
+  group: gass-imanage-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
@@ -21,10 +21,12 @@ jobs:
 
     env:
       DEVELOPER_DIR: /Applications/Xcode_26.0.1.app/Contents/Developer
-      SCHEME: GassiManager
+      SCHEME: Gass iManager
       CONFIGURATION: Release
+      APP_NAME: Gass iManager
+      EXPECTED_BUNDLE_ID: com.iamgasgass.gassimanager
       BUILD_DIR: ${{ github.workspace }}/build
-      IPA: ${{ github.workspace }}/GassiManager-Unsigned.ipa
+      IPA: ${{ github.workspace }}/Gass-iManager-Unsigned.ipa
 
     steps:
       - name: Checkout
@@ -35,7 +37,11 @@ jobs:
         run: |
           set -euo pipefail
           if [ ! -d "$DEVELOPER_DIR" ]; then
-            LATEST="$(ls -d /Applications/Xcode*.app | sort -V | tail -n 1)"
+            LATEST="$(ls -d /Applications/Xcode*.app 2>/dev/null | sort -V | tail -n 1 || true)"
+            if [ -z "$LATEST" ]; then
+              echo "::error::No Xcode installation found on this runner."
+              exit 1
+            fi
             echo "Pinned Xcode not found, falling back to $LATEST"
             echo "DEVELOPER_DIR=$LATEST/Contents/Developer" >> "$GITHUB_ENV"
             export DEVELOPER_DIR="$LATEST/Contents/Developer"
@@ -55,9 +61,9 @@ jobs:
         run: |
           set -euo pipefail
           xcodegen generate --spec project.yml
-          xcodebuild -project GassiManager.xcodeproj -list
+          xcodebuild -project "Gass iManager.xcodeproj" -list
 
-      - name: Build GassiManager
+      - name: Build Gass iManager
         shell: bash
         run: |
           set -uo pipefail
@@ -67,7 +73,7 @@ jobs:
 
           xcodebuild \
             clean build \
-            -project GassiManager.xcodeproj \
+            -project "Gass iManager.xcodeproj" \
             -scheme "$SCHEME" \
             -configuration "$CONFIGURATION" \
             -sdk iphoneos \
@@ -93,30 +99,41 @@ jobs:
             exit "$STATUS"
           fi
 
-      - name: Verify GassiManager bundle
+      - name: Verify Gass iManager bundle
         shell: bash
         run: |
           set -euo pipefail
-          APP="$BUILD_DIR/Build/Products/${CONFIGURATION}-iphoneos/GassiManager.app"
+          APP="$BUILD_DIR/Build/Products/${CONFIGURATION}-iphoneos/${APP_NAME}.app"
           INFO="$APP/Info.plist"
 
-          test -d "$APP" || { echo "::error::GassiManager.app not found"; exit 1; }
+          test -d "$APP" || { echo "::error::${APP_NAME}.app not found at $APP"; exit 1; }
           test -f "$INFO" || { echo "::error::Info.plist missing"; exit 1; }
 
           EXECUTABLE="$(/usr/libexec/PlistBuddy -c 'Print :CFBundleExecutable' "$INFO")"
           BINARY="$APP/$EXECUTABLE"
-          test -f "$BINARY" || { echo "::error::GassiManager executable missing"; find "$APP" -maxdepth 2 -print; exit 1; }
+          test -f "$BINARY" || { echo "::error::App executable missing: $BINARY"; find "$APP" -maxdepth 2 -print; exit 1; }
 
-          for KEY in CFBundleDisplayName CFBundleExecutable CFBundleIdentifier CFBundleShortVersionString; do
+          for KEY in CFBundleDisplayName CFBundleExecutable CFBundleIdentifier CFBundleShortVersionString CFBundleVersion; do
             printf '%s: ' "$KEY"
             /usr/libexec/PlistBuddy -c "Print :$KEY" "$INFO"
           done
 
           BUNDLE_ID="$(/usr/libexec/PlistBuddy -c 'Print :CFBundleIdentifier' "$INFO")"
-          if [ "$BUNDLE_ID" != "app.gassilab.GassiManager" ]; then
-            echo "::error::Unexpected bundle identifier: $BUNDLE_ID"
+          if [ "$BUNDLE_ID" != "$EXPECTED_BUNDLE_ID" ]; then
+            echo "::error::Unexpected bundle identifier: $BUNDLE_ID (expected $EXPECTED_BUNDLE_ID)"
             exit 1
           fi
+
+          DISPLAY_NAME="$(/usr/libexec/PlistBuddy -c 'Print :CFBundleDisplayName' "$INFO")"
+          if [ "$DISPLAY_NAME" != "$APP_NAME" ]; then
+            echo "::error::Unexpected display name: $DISPLAY_NAME (expected $APP_NAME)"
+            exit 1
+          fi
+
+          SHORT_VERSION="$(/usr/libexec/PlistBuddy -c 'Print :CFBundleShortVersionString' "$INFO")"
+          BUILD_VERSION="$(/usr/libexec/PlistBuddy -c 'Print :CFBundleVersion' "$INFO")"
+          test -n "$SHORT_VERSION" || { echo "::error::CFBundleShortVersionString is empty"; exit 1; }
+          test -n "$BUILD_VERSION" || { echo "::error::CFBundleVersion is empty"; exit 1; }
 
           file "$BINARY"
           lipo -info "$BINARY"
@@ -125,31 +142,31 @@ jobs:
           if [ -n "$ICON_METADATA" ]; then
             printf '%s\n' "$ICON_METADATA"
           else
-            echo "::warning::CFBundleIcons is not present. The current GassiManager project has no AppIcon asset catalog configured; continuing without making this a build failure."
+            echo "::warning::CFBundleIcons is not present. No AppIcon asset catalog is configured; continuing without making this a build failure."
           fi
 
       - name: Create unsigned IPA
         shell: bash
         run: |
           set -euo pipefail
-          APP="$BUILD_DIR/Build/Products/${CONFIGURATION}-iphoneos/GassiManager.app"
+          APP="$BUILD_DIR/Build/Products/${CONFIGURATION}-iphoneos/${APP_NAME}.app"
           EXECUTABLE="$(/usr/libexec/PlistBuddy -c 'Print :CFBundleExecutable' "$APP/Info.plist")"
           PAYLOAD="$GITHUB_WORKSPACE/Payload"
           rm -rf "$PAYLOAD" "$IPA"
           mkdir -p "$PAYLOAD"
-          cp -R "$APP" "$PAYLOAD/GassiManager.app"
+          cp -R "$APP" "$PAYLOAD/${APP_NAME}.app"
           cd "$GITHUB_WORKSPACE"
           ditto -c -k --sequesterRsrc --keepParent "$PAYLOAD" "$IPA"
           ls -lh "$IPA"
-          unzip -l "$IPA" | grep -F "Payload/GassiManager.app/$EXECUTABLE" >/dev/null
-          unzip -l "$IPA" | grep -F "Payload/GassiManager.app/Info.plist" >/dev/null
-          echo "Unsigned IPA structure OK."
+          unzip -l "$IPA" | grep -F "Payload/${APP_NAME}.app/$EXECUTABLE" >/dev/null
+          unzip -l "$IPA" | grep -F "Payload/${APP_NAME}.app/Info.plist" >/dev/null
+          echo "Unsigned IPA structure OK. This IPA is not code-signed and is not ready for direct installation."
 
       - name: Upload IPA
         if: success()
         uses: actions/upload-artifact@v4
         with:
-          name: GassiManager-Unsigned-IPA
+          name: Gass-iManager-Unsigned-IPA
           path: ${{ env.IPA }}
           if-no-files-found: error
           retention-days: 14
@@ -158,7 +175,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: GassiManager-Build-Log
+          name: Gass-iManager-Build-Log
           path: ${{ env.BUILD_DIR }}/logs/xcodebuild.log
           if-no-files-found: warn
           retention-days: 7
