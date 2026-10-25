@@ -5,6 +5,7 @@ App iOS nativa SwiftUI con interfaccia **Liquid Glass** (iOS 26+), scanner di en
 ## Funzionalità
 
 - Legge a runtime i valori firmati dell'app per un catalogo esteso di chiavi entitlement conosciute.
+- Include `com.apple.developer.kernel.increased-memory-limit` nel catalogo visibile, controllandolo come valore booleano della firma; aggiungere la voce al catalogo non abilita né richiede automaticamente il privilegio.
 - Distingue **Presente**, **Assente** ed **Errore di lettura**: un errore non viene riportato come entitlement assente.
 - Filtra per stato e ricerca per chiave, servizio o categoria.
 - Mostra o nasconde i valori firmati, con selezione e copia del testo.

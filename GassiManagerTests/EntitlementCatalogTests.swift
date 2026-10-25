@@ -18,4 +18,12 @@ final class EntitlementCatalogTests: XCTestCase {
     func testCatalogIsBroadEnoughToBeUseful() {
         XCTAssertGreaterThanOrEqual(EntitlementCatalog.definitions.count, 50)
     }
+
+    func testIncreasedMemoryLimitEntitlementIsCataloguedAsBoolean() {
+        let key = "com.apple.developer.kernel.increased-memory-limit"
+        let definition = EntitlementCatalog.definitions.first { $0.key == key }
+
+        XCTAssertNotNil(definition, "Gass iManager deve visualizzare l'entitlement increased-memory-limit.")
+        XCTAssertEqual(definition?.kind, .boolean)
+    }
 }
