@@ -24,7 +24,7 @@ struct AboutView: View {
 
                     Text("Limite importante di iOS")
                         .font(.headline)
-                    Text("Apple non espone alle app iOS un'API pubblica per enumerare tutte le chiavi di entitlement possibili. GassiManager legge i valori firmati per le chiavi del catalogo incluso nel progetto. Per controllare un'entitlement Apple nuovo o proprietario, aggiungi la sua chiave e il tipo corretto a EntitlementCatalog.swift.")
+                    Text("Apple non espone alle app iOS un'API pubblica per enumerare tutte le chiavi di entitlement possibili. Gass iManager legge i valori firmati per le chiavi del catalogo incluso nel progetto. Per controllare un'entitlement Apple nuovo o proprietario, aggiungi la sua chiave e il tipo corretto a EntitlementCatalog.swift.")
                         .font(.subheadline)
                         .foregroundStyle(.secondary)
                         .fixedSize(horizontal: false, vertical: true)

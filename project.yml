@@ -1,6 +1,6 @@
-name: GassiManager
+name: Gass iManager
 options:
-  bundleIdPrefix: app.gassilab
+  bundleIdPrefix: com.iamgasgass
   deploymentTarget:
     iOS: "26.0"
   xcodeVersion: "26.0"
@@ -13,7 +13,7 @@ packages:
     from: 2.0.0
 
 targets:
-  GassiManager:
+  "Gass iManager":
     type: application
     platform: iOS
     deploymentTarget: "26.0"
@@ -24,10 +24,16 @@ targets:
         product: AppEntitlements
     settings:
       base:
-        PRODUCT_BUNDLE_IDENTIFIER: app.gassilab.GassiManager
-        PRODUCT_NAME: GassiManager
-        INFOPLIST_KEY_CFBundleDisplayName: GassiManager
+        PRODUCT_BUNDLE_IDENTIFIER: com.iamgasgass.gassimanager
+        PRODUCT_NAME: "Gass iManager"
+        PRODUCT_MODULE_NAME: GassiManager
+        INFOPLIST_KEY_CFBundleDisplayName: "Gass iManager"
+        INFOPLIST_KEY_CFBundleName: "Gass iManager"
+        INFOPLIST_KEY_CFBundleShortVersionString: "1.0.0"
+        INFOPLIST_KEY_CFBundleVersion: "1"
         INFOPLIST_KEY_LSApplicationCategoryType: public.app-category.utilities
+        MARKETING_VERSION: "1.0.0"
+        CURRENT_PROJECT_VERSION: "1"
         GENERATE_INFOPLIST_FILE: YES
         SWIFT_VERSION: "6.0"
         SWIFT_STRICT_CONCURRENCY: complete
@@ -43,21 +49,24 @@ targets:
           SWIFT_COMPILATION_MODE: wholemodule
     scheme:
       testTargets:
-        - GassiManagerTests
+        - "Gass iManagerTests"
       gatherCoverageData: true
 
-  GassiManagerTests:
+  "Gass iManagerTests":
     type: bundle.unit-test
     platform: iOS
     deploymentTarget: "26.0"
     sources:
       - path: GassiManagerTests
     dependencies:
-      - target: GassiManager
+      - target: "Gass iManager"
     settings:
       base:
-        PRODUCT_BUNDLE_IDENTIFIER: app.gassilab.GassiManagerTests
+        PRODUCT_BUNDLE_IDENTIFIER: com.iamgasgass.gassimanager.tests
+        PRODUCT_MODULE_NAME: GassiManagerTests
         GENERATE_INFOPLIST_FILE: YES
         SWIFT_VERSION: "6.0"
         SWIFT_STRICT_CONCURRENCY: complete
         IPHONEOS_DEPLOYMENT_TARGET: "26.0"
+        MARKETING_VERSION: "1.0.0"
+        CURRENT_PROJECT_VERSION: "1"

@@ -154,7 +154,7 @@ struct ContentView: View {
                 .background(.mint.opacity(0.1), in: Capsule())
             }
 
-            Text("GassiManager")
+            Text("Gass iManager")
                 .font(.system(size: 35, weight: .bold, design: .rounded))
                 .tracking(-1.5)
 
