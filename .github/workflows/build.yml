@@ -38,6 +38,38 @@ jobs:
       - name: Build for iOS Simulator
         run: |
           set -o pipefail
+          xcodebuild build \
+            -project GassiManager.xcodeproj \
+            -scheme GassiManager \
+            -configuration Debug \
+            -destination 'generic/platform=iOS Simulator' \
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGNING_REQUIRED=NO \
+            | tee build.log
+
+      - name: Upload build log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: gassimanager-build-log
+          path: build.log
+          if-no-files-found: ignore
+          retention-days: 7
+
+          xcode-version: "26.0"
+
+      - name: Install XcodeGen
+        run: brew install xcodegen
+
+      - name: Generate Xcode project
+        run: xcodegen generate --spec project.yml
+
+      - name: Resolve Swift packages
+        run: xcodebuild -resolvePackageDependencies -project GassiManager.xcodeproj -scheme GassiManager
+
+      - name: Build for iOS Simulator
+        run: |
+          set -o pipefail
           xcodebuild build
           -project GassiManager.xcodeproj
           -scheme GassiManager
