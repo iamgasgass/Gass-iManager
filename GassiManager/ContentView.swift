@@ -40,7 +40,7 @@ struct ContentView: View {
     var body: some View {
         NavigationStack {
             ZStack {
-                background
+                AppGlassBackground()
 
                 ScrollView {
                     VStack(alignment: .leading, spacing: 22) {
@@ -108,28 +108,6 @@ struct ContentView: View {
             .refreshable { scan() }
         }
         .tint(.mint)
-    }
-
-    private var background: some View {
-        ZStack {
-            Color(uiColor: .systemBackground)
-            LinearGradient(
-                colors: [Color.cyan.opacity(0.16), .clear, Color.indigo.opacity(0.18)],
-                startPoint: .topLeading,
-                endPoint: .bottomTrailing
-            )
-            Circle()
-                .fill(Color.cyan.opacity(0.10))
-                .frame(width: 300, height: 300)
-                .blur(radius: 90)
-                .offset(x: 150, y: -320)
-            Circle()
-                .fill(Color.purple.opacity(0.10))
-                .frame(width: 280, height: 280)
-                .blur(radius: 95)
-                .offset(x: -160, y: 340)
-        }
-        .ignoresSafeArea()
     }
 
     private var header: some View {
