@@ -1,0 +1,63 @@
+name: GassiManager
+options:
+  bundleIdPrefix: app.gassilab
+  deploymentTarget:
+    iOS: "26.0"
+  xcodeVersion: "26.0"
+  createIntermediateGroups: true
+  groupSortPosition: top
+
+packages:
+  AppEntitlements:
+    url: https://github.com/wiedem/app-entitlements.git
+    from: 2.0.0
+
+targets:
+  GassiManager:
+    type: application
+    platform: iOS
+    deploymentTarget: "26.0"
+    sources:
+      - path: GassiManager
+    dependencies:
+      - package: AppEntitlements
+        product: AppEntitlements
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: app.gassilab.GassiManager
+        PRODUCT_NAME: GassiManager
+        INFOPLIST_KEY_CFBundleDisplayName: GassiManager
+        INFOPLIST_KEY_LSApplicationCategoryType: public.app-category.utilities
+        GENERATE_INFOPLIST_FILE: YES
+        SWIFT_VERSION: "6.0"
+        SWIFT_STRICT_CONCURRENCY: complete
+        IPHONEOS_DEPLOYMENT_TARGET: "26.0"
+        TARGETED_DEVICE_FAMILY: "1,2"
+        CODE_SIGN_ENTITLEMENTS: GassiManager/GassiManager.entitlements
+        SUPPORTS_MACCATALYST: NO
+        ENABLE_PREVIEWS: YES
+      configs:
+        Debug:
+          SWIFT_ACTIVE_COMPILATION_CONDITIONS: DEBUG
+        Release:
+          SWIFT_COMPILATION_MODE: wholemodule
+    scheme:
+      testTargets:
+        - GassiManagerTests
+      gatherCoverageData: true
+
+  GassiManagerTests:
+    type: bundle.unit-test
+    platform: iOS
+    deploymentTarget: "26.0"
+    sources:
+      - path: GassiManagerTests
+    dependencies:
+      - target: GassiManager
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: app.gassilab.GassiManagerTests
+        GENERATE_INFOPLIST_FILE: YES
+        SWIFT_VERSION: "6.0"
+        SWIFT_STRICT_CONCURRENCY: complete
+        IPHONEOS_DEPLOYMENT_TARGET: "26.0"
